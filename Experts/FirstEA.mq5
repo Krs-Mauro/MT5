@@ -2,9 +2,15 @@
 #property link      ""
 #property version   "1.00"
 
+MqlRates candle[];
+MqlTick tick;
+
 int OnInit(){
-// here you initialize variables
-   return(INIT_SUCCEEDED);
+  CopyRates(_Symbol, _Period, 0, 10, candle);
+  ArraySetAsSeries(candle, true);
+  SymbolInfoTick(_Symbol,tick);
+  
+  return(INIT_SUCCEEDED);
 }
 
 void OnDeinit(const int reason){
@@ -13,6 +19,7 @@ void OnDeinit(const int reason){
 }
 
 void OnTick(){
-// here you can capture data
+  Print("Close = ", candle[0].close);
+  Print("#############################");
    
 }
