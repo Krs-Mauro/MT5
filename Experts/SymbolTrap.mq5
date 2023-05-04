@@ -13,13 +13,13 @@ int OnInit(){
   return(INIT_SUCCEEDED);
 }
 
-void OnDeinit(const int reason){
-// use this to unmount functions after EA closure
-   
-}
+void OnDeinit(const int reason){}
 
 void OnTick(){
-  Print("Close = ", candle[0].close);
-  Print("#############################");
+  /* Comments appear on the upper left corrner of the chart, prints appear
+  on the experts console and alerts appear as popups in the middle
+  of the screen */
+
+  Comment("Close = " + DoubleToString(candle[0].close));
    
 }
