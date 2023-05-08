@@ -6,7 +6,7 @@
 
 int movingAvgPeriod             = 7;
 int movingAvgShift              = 0;
-ENUM_MA_METHOD smoothingMethod  = MODE_SMA;
+ENUM_MA_METHOD Slow_MA_type  = MODE_SMA;
 ENUM_APPLIED_PRICE appliedPrice = PRICE_CLOSE;
 
 int movingAverageHandle;
@@ -14,7 +14,7 @@ double movingAverageBuffer[];
 
 // RELATIVE STRENGTH INDEX VARIABLES
 
-int maPeriod                         = 14;
+int RSI_period                         = 14;
 ENUM_APPLIED_PRICE RSIappliedPrice = PRICE_CLOSE;
 
 int RSIHandle;
@@ -29,14 +29,14 @@ int OnInit(){
     _Period, 
     movingAvgPeriod, 
     movingAvgShift, 
-    smoothingMethod, 
+    Slow_MA_type, 
     appliedPrice 
   );
 
   RSIHandle = iRSI(
     _Symbol,
     _Period,
-    maPeriod,
+    RSI_period,
     RSIappliedPrice
   );
 

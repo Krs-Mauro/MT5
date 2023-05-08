@@ -9,10 +9,6 @@
 #include <Helpers/OperationMethods/CloseSell.mqh>
 #include <Helpers/OperationMethods/SellAtMarket.mqh>
 
-
-ENUM_MA_METHOD smoothingMethod  = MODE_SMA;
-ENUM_APPLIED_PRICE appliedPrice = PRICE_CLOSE;
-
 // PRICE VARIABLES
 
 MqlRates candle[];
@@ -22,21 +18,26 @@ bool buy = false;
 
 // FAST MOVING AVERAGE VARIABLES
 
-int fastMovingAvgPeriod             = 12;
-int fastMovingAvgShift              = 0;
+input ENUM_MA_METHOD Fast_MA_type              = MODE_SMA;
+input ENUM_APPLIED_PRICE Fast_MA_applied_price = PRICE_CLOSE;
+input int Fast_MA_Period                       = 12;
+input int Fast_MA_shift                        = 0;
 int fastMovingAverageHandle;
 double fastMovingAverageBuffer[];
 
 // slow MOVING AVERAGE VARIABLES
 
-int slowMovingAvgPeriod             = 32;
-int slowMovingAvgShift              = 0;
+input ENUM_MA_METHOD Slow_MA_type              = MODE_SMA;
+input ENUM_APPLIED_PRICE Slow_MA_applied_price = PRICE_CLOSE;
+input int Slow_MA_Period                       = 12;
+input int Slow_MA_shift                        = 0;
 int slowMovingAverageHandle;
 double slowMovingAverageBuffer[];
 
 // RELATIVE STRENGTH INDEX VARIABLES
 
-int maPeriod                         = 5;
+input ENUM_APPLIED_PRICE RSI_applied_price = PRICE_CLOSE;
+input int RSI_period                       = 5;
 int RSIHandle;
 double RSIBuffer [];
 
@@ -45,26 +46,26 @@ int OnInit(){
   fastMovingAverageHandle = iMA(
     _Symbol, 
     _Period, 
-    fastMovingAvgPeriod, 
-    fastMovingAvgShift, 
-    smoothingMethod, 
-    appliedPrice 
+    Fast_MA_Period, 
+    Fast_MA_shift, 
+    Fast_MA_type, 
+    Fast_MA_applied_price 
   );
 
   slowMovingAverageHandle = iMA(
     _Symbol, 
     _Period, 
-    slowMovingAvgPeriod, 
-    slowMovingAvgShift, 
-    smoothingMethod, 
-    appliedPrice 
+    Slow_MA_Period, 
+    Slow_MA_shift, 
+    Slow_MA_type, 
+    Slow_MA_applied_price
   );
 
   RSIHandle = iRSI(
     _Symbol,
     _Period,
-    maPeriod,
-    appliedPrice
+    RSI_period,
+    RSI_applied_price
   );
 
   if(fastMovingAverageHandle < 0 || slowMovingAverageHandle < 0 ||RSIHandle < 0){
