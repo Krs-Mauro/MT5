@@ -16,7 +16,7 @@ int OnInit(){
 void OnDeinit(const int reason){}
 
 void OnTick(){
-  /* Comments appear on the upper left corrner of the chart, prints appear
+  /* Comments appear on the upper left corner of the chart, prints appear
   on the experts console and alerts appear as popups in the middle
   of the screen */
 
