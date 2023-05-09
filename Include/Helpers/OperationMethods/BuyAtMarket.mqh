@@ -2,7 +2,7 @@
 #property link      ""
 #property version   "1.00"
 
-void BuyAtMarket (MqlTick &tick, int numberOfLots = 100,int takeProfit = 60,int stopLoss = 30) {
+ulong BuyAtMarket (MqlTick &tick, int numberOfLots = 100,int takeProfit = 60,int stopLoss = 30) {
   int arbitraryIdentifier = 123456;
   MqlTradeRequest request;
   MqlTradeResult response;
@@ -26,14 +26,17 @@ void BuyAtMarket (MqlTick &tick, int numberOfLots = 100,int takeProfit = 60,int 
   if(!result){
     Print("Error sending order, Error: " , GetLastError());
     ResetLastError();
+    return -1;
   }
 
   if( response.retcode == 10008 || response.retcode == 10009){
     Print("Order executed successfully");
+    return response.order;
   }
   
   else {
     Print("Error sending order to buy, Error: " , GetLastError());
     ResetLastError();
+    return -1;
   }
 }

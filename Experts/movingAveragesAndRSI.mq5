@@ -18,9 +18,9 @@ bool buy = false;
 
 // FAST MOVING AVERAGE VARIABLES
 
-input ENUM_MA_METHOD Fast_MA_type              = MODE_SMA;
+input ENUM_MA_METHOD Fast_MA_type              = MODE_EMA;
 input ENUM_APPLIED_PRICE Fast_MA_applied_price = PRICE_CLOSE;
-input int Fast_MA_Period                       = 12;
+input int Fast_MA_Period                       = 26;
 input int Fast_MA_shift                        = 0;
 int fastMovingAverageHandle;
 double fastMovingAverageBuffer[];
@@ -29,7 +29,7 @@ double fastMovingAverageBuffer[];
 
 input ENUM_MA_METHOD Slow_MA_type              = MODE_SMA;
 input ENUM_APPLIED_PRICE Slow_MA_applied_price = PRICE_CLOSE;
-input int Slow_MA_Period                       = 12;
+input int Slow_MA_Period                       = 60;
 input int Slow_MA_shift                        = 0;
 int slowMovingAverageHandle;
 double slowMovingAverageBuffer[];
@@ -37,7 +37,7 @@ double slowMovingAverageBuffer[];
 // RELATIVE STRENGTH INDEX VARIABLES
 
 input ENUM_APPLIED_PRICE RSI_applied_price = PRICE_CLOSE;
-input int RSI_period                       = 5;
+input int RSI_period                       = 4;
 int RSIHandle;
 double RSIBuffer [];
 
@@ -87,6 +87,7 @@ void OnDeinit(const int reason){
 }
 
 void OnTick(){
+  ulong ticket_number = 0;
   bool checkIfNewBar = isNewBar();
 
   CopyBuffer(fastMovingAverageHandle, 0, 0, 3, fastMovingAverageBuffer);
@@ -102,35 +103,55 @@ void OnTick(){
 
   SymbolInfoTick(_Symbol,localTick);
 
-  bool movingAverageBuy  = fastMovingAverageBuffer[0] > slowMovingAverageBuffer[0]
+  bool trend_slope = slowMovingAverageBuffer[0] > slowMovingAverageBuffer[2];
+
+  bool MA_buy_crossing  = fastMovingAverageBuffer[0] > slowMovingAverageBuffer[0]
                         && fastMovingAverageBuffer[2] < slowMovingAverageBuffer[2];
 
-  bool RSIBuy = RSIBuffer[0] < 30; // over sold threshold
+  bool RSIBuy = RSIBuffer[0] < 20; // over sold threshold
 
-  bool movingAverageSell  = fastMovingAverageBuffer[0] < slowMovingAverageBuffer[0]
+  bool MA_sell_crossing  = fastMovingAverageBuffer[0] < slowMovingAverageBuffer[0]
                         && fastMovingAverageBuffer[2] > slowMovingAverageBuffer[2];
 
-  bool RSISell = RSIBuffer[0] < 70; // over bought threshold
+  bool RSISell = RSIBuffer[0] < 80; // over bought threshold
 
-  double rounded_0 = NormalizeDouble(fastMovingAverageBuffer[0], 7);
-  double rounded_1 = NormalizeDouble(fastMovingAverageBuffer[1], 7);
-  double rounded_2 = NormalizeDouble(fastMovingAverageBuffer[2], 7);
-
-
-  sell = movingAverageSell && RSISell;
-  buy = movingAverageBuy && RSIBuy;
+  sell = MA_sell_crossing && RSISell && trend_slope == false;
+  buy = MA_buy_crossing && RSIBuy && trend_slope;
 
 
   if( checkIfNewBar ){
 
     if(buy && PositionSelect(_Symbol)==false){
       drawVerticalLine("Buy", candle[1].time, clrBlue);
-      BuyAtMarket(localTick);
+      ulong buy_ticket = BuyAtMarket(localTick);
+
+      if(buy_ticket>0){ticket_number=buy_ticket;}
     }
 
     if(sell && PositionSelect(_Symbol)==false){
       drawVerticalLine("Sell", candle[1].time, clrRed);
-      SellAtMarket(localTick);
+      ulong sell_ticket= SellAtMarket(localTick);
+      if(sell_ticket>0){ticket_number=sell_ticket;}
     }
   }
+  
+  if(PositionSelectByTicket(ticket_number)){
+
+  MqlTradeRequest modifyRequest;
+  ZeroMemory(modifyRequest);
+  
+  modifyRequest.action = TRADE_ACTION_SLTP;
+  modifyRequest.position = ticket_number;
+  modifyRequest.sl = slowMovingAverageBuffer[0];
+  modifyRequest.tp = PositionGetDouble(POSITION_TP);
+
+  MqlTradeResult modifyResponse;
+  ZeroMemory(modifyResponse);
+
+  if(!OrderSend(modifyRequest, modifyResponse)){
+    Print("Error modifying order, Error: " , GetLastError());
+    ResetLastError();
+  }
+  
+}
 }
